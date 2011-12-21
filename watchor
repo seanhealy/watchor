@@ -1,0 +1,60 @@
+#! /usr/bin/ruby
+
+require 'rubygems'
+require 'rb-fsevent'
+require 'growl'
+require 'readline'
+require 'optparse'
+
+include Growl
+
+# This hash will hold all of the options
+# parsed from the command-line by
+# OptionParser.
+options = {}
+
+optparse = OptionParser.new do|opts|
+	
+	opts.banner = "Usage: watchor <comand>"
+	
+	# TODO: Put command-line options here
+	
+	# options[:continuous] = false
+	# opts.on( '-c', '--continuous', "Stay open and push continuously on file change" ) do
+		# options[:continuous] = true
+	# end
+	
+	# This displays the help screen, all programs are
+	# assumed to have this option.
+	opts.on( '-h', '--help', 'Display this screen' ) do
+		puts opts
+		exit
+	end
+
+	if ARGV.size == 0 then
+		puts opts
+		exit
+	end
+end
+
+# Parse the command-line. Remember there are two forms
+# of the parse method. The 'parse' method simply parses
+# ARGV, while the 'parse!' method parses ARGV and removes
+# any options found there, as well as any parameters for
+# the options. What's left is the list of files to resize.
+optparse.parse!
+
+# get the server and strip the http off
+command = ARGV.first.dup
+
+# start the event watching
+fsevent = FSEvent.new
+fsevent.watch Dir.pwd do |directories|
+	`date`
+	`#{command}`
+	
+	notify_ok "Executed: #{command}"
+end
+
+fsevent.run
+
